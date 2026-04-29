@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập – QL Tour</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08111f;--card:#0f1c30;--border:#1e3050;
+  --accent:#f5a623;--teal:#2dd4bf;--text:#e8edf8;--muted:#6a7d9a;
+}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+/* animated bg */
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.18;animation:float 8s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:#f5a623;top:-150px;left:-150px;animation-delay:0s}
+.orb2{width:400px;height:400px;background:#2dd4bf;bottom:-100px;right:-100px;animation-delay:3s}
+.orb3{width:300px;height:300px;background:#6366f1;top:40%;left:60%;animation-delay:5s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+
+.wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:20px}
+.card{
+  background:rgba(15,28,48,0.85);backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:20px;padding:44px 40px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.5);
+}
+.logo{text-align:center;margin-bottom:36px}
+.logo h1{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--accent);letter-spacing:-1px}
+.logo p{color:var(--muted);font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+
+.demo-accounts{
+  background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);
+  border-radius:12px;padding:14px 16px;margin-bottom:28px;font-size:0.8rem;
+}
+.demo-accounts .demo-title{color:var(--accent);font-weight:700;margin-bottom:8px;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px}
+.demo-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.demo-row:last-child{border-bottom:none}
+.demo-badge{font-size:0.7rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-admin{background:rgba(239,68,68,0.2);color:#f87171}
+.badge-nv{background:rgba(45,212,191,0.2);color:#2dd4bf}
+.badge-kh{background:rgba(245,166,35,0.2);color:#f5a623}
+.demo-email{color:var(--text);font-size:0.78rem}
+.demo-pw{color:var(--muted);font-size:0.75rem}
+.use-btn{
+  font-size:0.7rem;padding:2px 8px;background:rgba(255,255,255,0.07);
+  border:1px solid var(--border);border-radius:6px;color:var(--muted);
+  cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;
+}
+.use-btn:hover{background:rgba(245,166,35,0.15);color:var(--accent);border-color:var(--accent)}
+
+.form-group{margin-bottom:18px}
+label{display:block;font-size:0.75rem;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:7px}
+.input-wrap{position:relative}
+input{
+  width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);
+  color:var(--text);padding:12px 16px;border-radius:10px;font-size:0.9rem;
+  font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;
+}
+input:focus{border-color:var(--accent);background:rgba(245,166,35,0.05);box-shadow:0 0 0 3px rgba(245,166,35,0.1)}
+input::placeholder{color:var(--muted)}
+
+.btn-login{
+  width:100%;padding:13px;background:var(--accent);color:#1a1000;
+  border:none;border-radius:10px;font-size:0.95rem;font-weight:700;
+  font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:6px;
+  transition:all 0.2s;letter-spacing:0.3px;
+}
+.btn-login:hover{background:#f7b843;transform:translateY(-1px);box-shadow:0 8px 24px rgba(245,166,35,0.35)}
+.btn-login:active{transform:none}
+.btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+
+.err{
+  background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);
+  color:#f87171;border-radius:8px;padding:10px 14px;font-size:0.83rem;
+  margin-bottom:16px;display:none;
+}
+.err.show{display:block}
+.spinner-sm{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,0.3);border-top-color:#1a1000;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="logo">
+      <h1>QL Tour ✈</h1>
+      <p>Hệ thống quản lý du lịch</p>
+    </div>
+
+    <!-- Demo accounts -->
+    <div class="demo-accounts">
+      <div class="demo-title">👤 Tài khoản thử nghiệm</div>
+      <div class="demo-row">
+        <span class="demo-badge badge-admin">Admin</span>
+        <span class="demo-email">an</span>
+        <span class="demo-pw">/ 123</span>
+        <button class="use-btn" onclick="fill('an@gmail.com','123')">Dùng</button>
+      </div>
+      <div class="demo-row">
+        <span class="demo-badge badge-nv">Nhân viên</span>
+        <span class="demo-email">phuong</span>
+        <span class="demo-pw">/ 123</span>
+        <button class="use-btn" onclick="fill('phuong@gmail.com','123')">Dùng</button>
+      </div>
+      <div class="demo-row">
+        <span class="demo-badge badge-kh">Khách hàng</span>
+        <span class="demo-email">binh</span>
+        <span class="demo-pw">/ 123</span>
+        <button class="use-btn" onclick="fill('binh@gmail.com','123')">Dùng</button>
+      </div>
+    </div>
+
+    <div class="err" id="errBox"></div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="nhập email..." autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Mật khẩu</label>
+      <input type="password" id="password" placeholder="nhập mật khẩu..." onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Đăng nhập</button>
+  </div>
+</div>
+
+<script>
+function fill(email, pw) {
+  document.getElementById('email').value = email;
+  document.getElementById('password').value = pw;
+  document.getElementById('errBox').classList.remove('show');
+}
+
+function showErr(msg){
+  const err = document.getElementById('errBox');
+  err.textContent = '⚠️ ' + msg;
+  err.classList.add('show');
+}
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('password').value.trim();
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('errBox');
+
+  err.classList.remove('show');
+
+  if (!email || !pw) {
+    showErr('Vui lòng nhập đầy đủ thông tin');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-sm"></span>Đang đăng nhập...';
+
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        mat_khau: pw
+      }),
+      credentials: 'include'
+    });
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      showErr(data.error || 'Đăng nhập thất bại');
+      return;
+    }
+
+    window.location.href = "/index";
+
+  } catch(e) {
+    showErr('Không kết nối được server');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Đăng nhập';
+  }
+}
+</script>
+</body>
+</html>
