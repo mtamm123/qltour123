@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QL Tour — Hệ thống quản lý tour du lịch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f1a;
+  --surface: #131929;
+  --card: #1a2236;
+  --border: #243050;
+  --accent: #f5a623;
+  --accent2: #e05c5c;
+  --teal: #2dd4bf;
+  --text: #e8edf8;
+  --muted: #7a8aaa;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --radius: 12px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.sidebar-logo span {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.sidebar-nav { padding: 16px 0; flex: 1; }
+.nav-section {
+  padding: 8px 16px 4px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  margin: 1px 0;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-item.active {
+  color: var(--accent);
+  background: rgba(245,166,35,0.08);
+  border-left-color: var(--accent);
+}
+.nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* MAIN */
+.main {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: #1a1200; }
+.btn-primary:hover { background: #f7b843; transform: translateY(-1px); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { background: rgba(255,255,255,0.05); }
+.btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+/* CONTENT */
+.content {
+  padding: 28px 32px;
+  flex: 1;
+}
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* CARDS */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.tours::before { background: var(--accent); }
+.stat-card.users::before { background: var(--teal); }
+.stat-card.orders::before { background: var(--warning); }
+.stat-card.revenue::before { background: var(--success); }
+.stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-card.tours .stat-value { color: var(--accent); }
+.stat-card.users .stat-value { color: var(--teal); }
+.stat-card.orders .stat-value { color: var(--warning); }
+.stat-card.revenue .stat-value { color: var(--success); }
+.stat-sub { font-size: 0.78rem; color: var(--muted); }
+
+/* TABLE */
+.table-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.table-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.table-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.search-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  font-family: 'DM Sans', sans-serif;
+  width: 220px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; }
+th {
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 11px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  font-size: 0.855rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.badge-success { background: rgba(52,211,153,0.15); color: var(--success); }
+.badge-warning { background: rgba(251,191,36,0.15); color: var(--warning); }
+.badge-danger  { background: rgba(248,113,113,0.15); color: var(--danger); }
+.badge-blue    { background: rgba(45,212,191,0.15); color: var(--teal); }
+.badge-gray    { background: rgba(122,138,170,0.15); color: var(--muted); }
+.stars { color: var(--warning); letter-spacing: -2px; }
+.price { font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* GRID 2COL */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* LOADING */
+.loading {
+  text-align: center;
+  padding: 48px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.spinner {
+  display: inline-block;
+  width: 28px; height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* MODAL */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-head {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-title { font-weight: 700; font-size: 1.05rem; }
+.modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.3rem; }
+.modal-body { padding: 24px; }
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.form-control {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-control:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.modal-foot {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  z-index: 999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.toast.show { transform: none; opacity: 1; }
+.toast.success { border-left: 4px solid var(--success); }
+.toast.error   { border-left: 4px solid var(--danger); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 1100px) {
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>QL Tour</h1>
+    <span>Travel Management</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Tổng quan</div>
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+
+    <div class="nav-section" style="margin-top:8px">Quản lý</div>
+    <div class="nav-item" onclick="navigate('tours')">
+      <span class="icon">🗺️</span> Tour Du lịch
+    </div>
+    <div class="nav-item" onclick="navigate('lich')">
+      <span class="icon">📅</span> Lịch Khởi hành
+    </div>
+    <div class="nav-item" onclick="navigate('dondat')">
+      <span class="icon">📋</span> Đơn Đặt Tour
+    </div>
+    <div class="nav-item" onclick="navigate('thanhtoan')">
+      <span class="icon">💳</span> Thanh Toán
+    </div>
+
+    <div class="nav-section" style="margin-top:8px">Người dùng</div>
+    <div class="nav-item" onclick="navigate('nguoidung')">
+      <span class="icon">👥</span> Người Dùng
+    </div>
+    <div class="nav-item" onclick="navigate('danhgia')">
+      <span class="icon">⭐</span> Đánh Giá
+    </div>
+    <div class="nav-item" onclick="navigate('hotro')">
+      <span class="icon">💬</span> Hỗ Trợ
+    </div>
+
+    <div class="nav-section" style="margin-top:8px">Khác</div>
+    <div class="nav-item" onclick="navigate('ncc')">
+      <span class="icon">🏢</span> Nhà Cung Cấp
+    </div>
+    <div class="nav-item" onclick="navigate('doanhthu')">
+      <span class="icon">💰</span> Doanh Thu
+    </div>
+  </nav>
+  <div class="sidebar-footer">QL_TOUR v1.0 &nbsp;·&nbsp; Flask + SQL Server</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+
+    <span class="topbar-title">
+      {% block topbar %}{% endblock %}
+    </span>
+
+    <div class="d-flex align-items-center gap-3">
+
+      <div class="search-wrap d-none d-md-block">
+        <i class="bi bi-search"></i>
+        <input id="gSearch" type="text" class="form-control form-control-sm"
+               placeholder="Tìm kiếm nhanh..." autocomplete="off"
+               onkeydown="if(event.key==='Enter')doSearch(this.value)">
+      </div>
+
+      <span style="font-size:12px;color:#94a3b8;">
+        <i class="bi bi-circle-fill text-success" style="font-size:8px;"></i>
+        Kết nối CSDL
+      </span>
+
+      <!-- NÚT ĐĂNG XUẤT -->
+      <a href="/logout" class="btn btn-danger btn-sm">
+        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+      </a>
+
+    </div>
+
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section class="page-section active" id="sec-dashboard">
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card tours"><div class="stat-label">Tour đang mở</div><div class="stat-value" id="s-tours">—</div></div>
+        <div class="stat-card users"><div class="stat-label">Người dùng</div><div class="stat-value" id="s-users">—</div></div>
+        <div class="stat-card orders"><div class="stat-label">Đơn đặt</div><div class="stat-value" id="s-orders">—</div></div>
+        <div class="stat-card revenue"><div class="stat-label">Doanh thu</div><div class="stat-value" id="s-revenue">—</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">🏆 Top Tour Nổi bật</span></div>
+          <table><thead><tr>
+            <th>Tour</th><th>Đơn</th><th>Doanh thu</th>
+          </tr></thead>
+          <tbody id="topToursTbl"><tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">📦 Trạng thái đơn đặt</span></div>
+          <table><thead><tr><th>Trạng thái</th><th>Số lượng</th></tr></thead>
+          <tbody id="donTrangThaiTbl"><tr><td colspan="2" class="loading"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOURS -->
+    <section class="page-section" id="sec-tours">
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">🗺️ Danh sách Tour</span>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="text" class="search-input" placeholder="Tìm tour..." id="searchTour" oninput="searchTours()">
+            <button class="btn btn-primary btn-sm" onclick="openTourModal()">+ Thêm tour</button>
+          </div>
+        </div>
+        <table><thead><tr>
+          <th>Mã</th><th>Tên Tour</th><th>Số ngày</th><th>Giá</th><th>Sức chứa</th><th>Đánh giá</th><th>Trạng thái</th><th>Thao tác</th>
+        </tr></thead>
+        <tbody id="toursTbl"><tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- LỊCH -->
+    <section class="page-section" id="sec-lich">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">📅 Lịch Khởi hành</span></div>
+        <table><thead><tr>
+          <th>Mã lịch</th><th>Tour</th><th>Giá</th><th>Ngày bắt đầu</th><th>Ngày kết thúc</th><th>Chỗ còn lại</th><th>Trạng thái</th>
+        </tr></thead>
+        <tbody id="lichTbl"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ĐẶT TOUR -->
+    <section class="page-section" id="sec-dondat">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">📋 Đơn Đặt Tour</span></div>
+        <table><thead><tr>
+          <th>Mã đơn</th><th>Khách hàng</th><th>Tour</th><th>Ngày đi</th><th>Ngày về</th><th>Khách</th><th>Tổng tiền</th><th>Trạng thái</th>
+        </tr></thead>
+        <tbody id="dondatTbl"><tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- THANH TOÁN -->
+    <section class="page-section" id="sec-thanhtoan">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">💳 Thanh Toán</span></div>
+        <table><thead><tr>
+          <th>Mã TT</th><th>Mã đơn</th><th>Khách hàng</th><th>Tour</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th><th>Ngày</th>
+        </tr></thead>
+        <tbody id="thanhtoanTbl"><tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- NGƯỜI DÙNG -->
+    <section class="page-section" id="sec-nguoidung">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">👥 Người Dùng</span></div>
+        <table><thead><tr>
+          <th>Mã</th><th>Họ tên</th><th>Email</th><th>Điện thoại</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th>
+        </tr></thead>
+        <tbody id="nguoidungTbl"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ĐÁNH GIÁ -->
+    <section class="page-section" id="sec-danhgia">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">⭐ Đánh Giá</span></div>
+        <table><thead><tr>
+          <th>Mã</th><th>Khách hàng</th><th>Tour</th><th>Sao</th><th>Nội dung</th><th>Trạng thái</th><th>Ngày</th>
+        </tr></thead>
+        <tbody id="danhgiaTbl"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- HỖ TRỢ -->
+    <section class="page-section" id="sec-hotro">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">💬 Hỗ Trợ Khách hàng</span></div>
+        <table><thead><tr>
+          <th>Mã</th><th>Khách hàng</th><th>Tiêu đề</th><th>Nội dung</th><th>Phản hồi</th><th>Trạng thái</th><th>Ngày</th>
+        </tr></thead>
+        <tbody id="hotroTbl"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- NHÀ CUNG CẤP -->
+    <section class="page-section" id="sec-ncc">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">🏢 Nhà Cung Cấp</span></div>
+        <table><thead><tr>
+          <th>Mã</th><th>Tên NCC</th><th>Loại dịch vụ</th><th>Điện thoại</th><th>Email</th><th>Địa chỉ</th><th>Trạng thái</th>
+        </tr></thead>
+        <tbody id="nccTbl"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DOANH THU -->
+    <section class="page-section" id="sec-doanhthu">
+      <div class="table-card">
+        <div class="table-header"><span class="table-title">💰 Doanh Thu Theo Tour</span></div>
+        <table><thead><tr>
+          <th>Mã Tour</th><th>Tên Tour</th><th>Số đơn</th><th>Tổng doanh thu</th>
+        </tr></thead>
+        <tbody id="doanhThuTbl"><tr><td colspan="4" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL TOUR -->
+<div class="modal-backdrop" id="tourModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="tourModalTitle">Thêm Tour mới</span>
+      <button class="modal-close" onclick="closeTourModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Mã Tour</label>
+          <input type="text" class="form-control" id="f-ma_tour" placeholder="T11">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên Tour</label>
+          <input type="text" class="form-control" id="f-ten_tour" placeholder="Tour ...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mô tả</label>
+        <textarea class="form-control" id="f-mo_ta" rows="2" placeholder="Mô tả ngắn..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Số ngày</label>
+          <input type="number" class="form-control" id="f-so_ngay" min="1" value="3">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Giá (VNĐ)</label>
+          <input type="number" class="form-control" id="f-gia" min="0" placeholder="2500000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Sức chứa</label>
+          <input type="number" class="form-control" id="f-suc_chua" min="1" value="30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trạng thái</label>
+          <select class="form-control" id="f-trang_thai">
+            <option value="đang mở">Đang mở</option>
+            <option value="đã đóng">Đã đóng</option>
+            <option value="tạm dừng">Tạm dừng</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeTourModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveTour()" id="saveTourBtn">Lưu Tour</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = 'http://localhost:5000/api';
+let currentPage = 'dashboard';
+let editingTourId = null;
+let toursData = [];
+
+// ============ NAVIGATION ============
+function navigate(page) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+  currentPage = page;
+
+  const titles = {
+    dashboard:'Dashboard', tours:'Tour Du lịch', lich:'Lịch Khởi hành',
+    dondat:'Đơn Đặt Tour', thanhtoan:'Thanh Toán', nguoidung:'Người Dùng',
+    danhgia:'Đánh Giá', hotro:'Hỗ Trợ', ncc:'Nhà Cung Cấp', doanhthu:'Doanh Thu'
+  };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  document.getElementById('topbarAction').innerHTML = page==='tours'
+    ? `<button class="btn btn-primary btn-sm" onclick="openTourModal()">+ Thêm tour</button>`
+    : '';
+  loadPage(page);
+}
+
+function refreshPage() { loadPage(currentPage); }
+
+function loadPage(page) {
+  const loaders = {
+    dashboard: loadDashboard,
+    tours: loadTours,
+    lich: loadLich,
+    dondat: loadDonDat,
+    thanhtoan: loadThanhToan,
+    nguoidung: loadNguoiDung,
+    danhgia: loadDanhGia,
+    hotro: loadHoTro,
+    ncc: loadNCC,
+    doanhthu: loadDoanhThu,
+  };
+  if (loaders[page]) loaders[page]();
+}
+
+// ============ FETCH HELPER ============
+async function apiFetch(path) {
+  try {
+    const r = await fetch(BASE + path);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } catch(e) {
+    showToast('Lỗi kết nối: ' + e.message, 'error');
+    return null;
+  }
+}
+
+// ============ FORMAT ============
+function fmt(n) {
+  if (n==null) return '—';
+  return new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  return s.split('T')[0];
+}
+function badge(status) {
+  const m = {
+    'active':'success','đang mở':'success','thành công':'success','hiển thị':'success',
+    'hoạt động':'success','đã đặt':'blue',
+    'đang xử lý':'warning','tạm dừng':'warning',
+    'đã đóng':'danger','đã hủy':'danger','bị ẩn':'danger','inactive':'danger',
+  };
+  const cls = m[status] || 'gray';
+  return `<span class="badge badge-${cls}">${status||'—'}</span>`;
+}
+function stars(n) {
+  if (!n) return '—';
+  return '<span class="stars">' + '★'.repeat(n) + '☆'.repeat(5-n) + '</span>';
+}
+
+// ============ DASHBOARD ============
+async function loadDashboard() {
+  const data = await apiFetch('/dashboard');
+  if (!data) return;
+  document.getElementById('s-tours').textContent = data.tour_active ?? '—';
+  document.getElementById('s-users').textContent = data.nguoi_dung ?? '—';
+  document.getElementById('s-orders').textContent = data.don_dat ?? '—';
+  document.getElementById('s-revenue').textContent =
+    data.doanh_thu ? new Intl.NumberFormat('vi-VN',{notation:'compact',maximumFractionDigits:1}).format(data.doanh_thu) + ' ₫' : '—';
+
+  document.getElementById('topToursTbl').innerHTML = (data.top_tours||[]).map(r =>
+    `<tr><td>${r.ten_tour}</td><td>${r.so_don}</td><td class="price">${fmt(r.doanh_thu)}</td></tr>`
+  ).join('') || `<tr><td colspan="3" style="color:var(--muted);text-align:center">Không có dữ liệu</td></tr>`;
+
+  document.getElementById('donTrangThaiTbl').innerHTML = (data.don_theo_trang_thai||[]).map(r =>
+    `<tr><td>${badge(r.trang_thai)}</td><td><strong>${r.so_luong}</strong></td></tr>`
+  ).join('');
+}
+
+// ============ TOURS ============
+async function loadTours(search='') {
+  const url = search ? `/tours?search=${encodeURIComponent(search)}` : '/tours';
+  const data = await apiFetch(url);
+  if (!data) return;
+  toursData = data;
+  renderTours(data);
+}
+function renderTours(data) {
+  document.getElementById('toursTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code style="color:var(--accent);font-size:0.8rem">${r.ma_tour}</code></td>
+      <td><strong>${r.ten_tour}</strong><br><span style="color:var(--muted);font-size:0.75rem">${r.mo_ta||''}</span></td>
+      <td>${r.so_ngay} ngày</td>
+      <td class="price">${fmt(r.gia)}</td>
+      <td>${r.suc_chua} người</td>
+      <td>${stars(Math.round(r.diem_trung_binh))} <span style="color:var(--muted);font-size:0.75rem">(${r.so_danh_gia})</span></td>
+      <td>${badge(r.trang_thai)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editTour('${r.ma_tour}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTour('${r.ma_tour}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:32px">Không tìm thấy tour nào</td></tr>`;
+}
+function searchTours() {
+  const q = document.getElementById('searchTour').value;
+  clearTimeout(window._searchTimer);
+  window._searchTimer = setTimeout(() => loadTours(q), 350);
+}
+
+// ============ LICH ============
+async function loadLich() {
+  const data = await apiFetch('/lichkhaihanh');
+  if (!data) return;
+  document.getElementById('lichTbl').innerHTML = data.map(r => {
+    const pct = r.suc_chua ? Math.round((1 - r.so_cho_con_lai/r.suc_chua)*100) : 0;
+    const barColor = pct>80?'var(--danger)':pct>50?'var(--warning)':'var(--success)';
+    return `<tr>
+      <td><code style="color:var(--teal)">${r.ma_lich}</code></td>
+      <td>${r.ten_tour}</td>
+      <td class="price">${fmt(r.gia)}</td>
+      <td>${fmtDate(r.ngay_bat_dau)}</td>
+      <td>${fmtDate(r.ngay_ket_thuc)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${barColor};border-radius:3px"></div>
+          </div>
+          <span style="font-size:0.8rem;min-width:40px;text-align:right">${r.so_cho_con_lai}/${r.suc_chua}</span>
+        </div>
+      </td>
+      <td>${badge(r.trang_thai)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============ ĐẶT TOUR ============
+async function loadDonDat() {
+  const data = await apiFetch('/dondat');
+  if (!data) return;
+  document.getElementById('dondatTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code style="color:var(--warning)">${r.ma_don}</code></td>
+      <td>${r.ho_ten}</td>
+      <td>${r.ten_tour}</td>
+      <td>${fmtDate(r.ngay_bat_dau)}</td>
+      <td>${fmtDate(r.ngay_ket_thuc)}</td>
+      <td>${r.so_khach} người</td>
+      <td class="price">${fmt(r.tong_tien)}</td>
+      <td>${badge(r.trang_thai)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ THANH TOÁN ============
+async function loadThanhToan() {
+  const data = await apiFetch('/thanhtoan');
+  if (!data) return;
+  document.getElementById('thanhtoanTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code style="color:var(--success)">${r.ma_thanh_toan}</code></td>
+      <td><code>${r.ma_don}</code></td>
+      <td>${r.ho_ten}</td>
+      <td>${r.ten_tour}</td>
+      <td class="price">${fmt(r.so_tien)}</td>
+      <td><span class="badge badge-blue">${r.phuong_thuc}</span></td>
+      <td>${badge(r.trang_thai)}</td>
+      <td style="color:var(--muted)">${fmtDate(r.ngay_thanh_toan)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ NGƯỜI DÙNG ============
+async function loadNguoiDung() {
+  const data = await apiFetch('/nguoidung');
+  if (!data) return;
+  document.getElementById('nguoidungTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code>${r.ma_nguoi_dung}</code></td>
+      <td><strong>${r.ho_ten}</strong></td>
+      <td style="color:var(--muted)">${r.email}</td>
+      <td>${r.so_dien_thoai||'—'}</td>
+      <td>${r.vai_tro ? `<span class="badge badge-blue">${r.vai_tro}</span>` : '—'}</td>
+      <td>${badge(r.trang_thai)}</td>
+      <td style="color:var(--muted)">${fmtDate(r.ngay_tao)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ ĐÁNH GIÁ ============
+async function loadDanhGia() {
+  const data = await apiFetch('/danhgia');
+  if (!data) return;
+  document.getElementById('danhgiaTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code>${r.ma_danh_gia}</code></td>
+      <td>${r.ho_ten}</td>
+      <td>${r.ten_tour}</td>
+      <td>${stars(r.so_sao)}</td>
+      <td style="max-width:200px">${r.noi_dung||'—'}</td>
+      <td>${badge(r.trang_thai)}</td>
+      <td style="color:var(--muted)">${fmtDate(r.ngay_tao)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ HỖ TRỢ ============
+async function loadHoTro() {
+  const data = await apiFetch('/hotro');
+  if (!data) return;
+  document.getElementById('hotroTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code>${r.ma_ho_tro}</code></td>
+      <td>${r.ho_ten}</td>
+      <td><strong>${r.tieu_de}</strong></td>
+      <td style="max-width:180px;color:var(--muted)">${r.noi_dung}</td>
+      <td>${r.so_phan_hoi > 0 ? `<span class="badge badge-success">${r.so_phan_hoi} phản hồi</span>` : `<span class="badge badge-gray">Chưa phản hồi</span>`}</td>
+      <td>${badge(r.trang_thai)}</td>
+      <td style="color:var(--muted)">${fmtDate(r.ngay_tao)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ NCC ============
+async function loadNCC() {
+  const data = await apiFetch('/nhacungcap');
+  if (!data) return;
+  document.getElementById('nccTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><code>${r.ma_ncc}</code></td>
+      <td><strong>${r.ten_ncc}</strong></td>
+      <td><span class="badge badge-blue">${r.loai_dich_vu}</span></td>
+      <td>${r.so_dien_thoai||'—'}</td>
+      <td style="color:var(--muted)">${r.email||'—'}</td>
+      <td>${r.dia_chi||'—'}</td>
+      <td>${badge(r.trang_thai)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ DOANH THU ============
+async function loadDoanhThu() {
+  const data = await apiFetch('/doanhthu');
+  if (!data) return;
+  const max = Math.max(...data.map(r => r.tong_doanh_thu||0), 1);
+  document.getElementById('doanhThuTbl').innerHTML = data.map(r => {
+    const pct = Math.round((r.tong_doanh_thu||0)/max*100);
+    return `<tr>
+      <td><code style="color:var(--accent)">${r.ma_tour}</code></td>
+      <td>${r.ten_tour}</td>
+      <td>${r.so_don}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;max-width:160px">
+            <div style="width:${pct}%;height:100%;background:var(--accent);border-radius:4px"></div>
+          </div>
+          <span class="price" style="min-width:120px">${fmt(r.tong_doanh_thu)}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============ TOUR CRUD ============
+function openTourModal(data=null) {
+  editingTourId = data ? data.ma_tour : null;
+  document.getElementById('tourModalTitle').textContent = data ? 'Chỉnh sửa Tour' : 'Thêm Tour mới';
+  document.getElementById('f-ma_tour').value = data?.ma_tour||'';
+  document.getElementById('f-ma_tour').disabled = !!data;
+  document.getElementById('f-ten_tour').value = data?.ten_tour||'';
+  document.getElementById('f-mo_ta').value = data?.mo_ta||'';
+  document.getElementById('f-so_ngay').value = data?.so_ngay||3;
+  document.getElementById('f-gia').value = data?.gia||'';
+  document.getElementById('f-suc_chua').value = data?.suc_chua||30;
+  document.getElementById('f-trang_thai').value = data?.trang_thai||'đang mở';
+  document.getElementById('tourModal').classList.add('open');
+}
+function closeTourModal() {
+  document.getElementById('tourModal').classList.remove('open');
+  editingTourId = null;
+}
+function editTour(id) {
+  const t = toursData.find(r => r.ma_tour === id);
+  if (t) openTourModal(t);
+}
+async function saveTour() {
+  const body = {
+    ma_tour: document.getElementById('f-ma_tour').value.trim(),
+    ten_tour: document.getElementById('f-ten_tour').value.trim(),
+    mo_ta: document.getElementById('f-mo_ta').value.trim(),
+    so_ngay: +document.getElementById('f-so_ngay').value,
+    gia: +document.getElementById('f-gia').value,
+    suc_chua: +document.getElementById('f-suc_chua').value,
+    trang_thai: document.getElementById('f-trang_thai').value,
+  };
+  if (!body.ma_tour || !body.ten_tour || !body.gia) {
+    showToast('Vui lòng điền đầy đủ thông tin!', 'error'); return;
+  }
+  const url = editingTourId ? `/tours/${editingTourId}` : '/tours';
+  const method = editingTourId ? 'PUT' : 'POST';
+  try {
+    const r = await fetch(BASE + url, {
+      method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const json = await r.json();
+    if (!r.ok) throw new Error(json.error||'Lỗi');
+    showToast(json.message, 'success');
+    closeTourModal();
+    loadTours();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+async function deleteTour(id) {
+  if (!confirm(`Xóa tour ${id}?`)) return;
+  try {
+    const r = await fetch(`${BASE}/tours/${id}`, {method:'DELETE'});
+    const json = await r.json();
+    if (!r.ok) throw new Error(json.error);
+    showToast(json.message, 'success');
+    loadTours();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ============ TOAST ============
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✅ ':'❌ ') + msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ============ INIT ============
+loadDashboard();
+</script>
+</body>
+</html>
